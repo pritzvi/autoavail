@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <style>
+      body { min-width: 400px; font-family: Arial, sans-serif; }
+      #token-section { margin-top: 1em; }
+      #events { margin-top: 1em; }
+      input[type="text"] { width: 90%; }
+    </style>
+  </head>
+  <body>
+    <h1>AutoAvail</h1>
+    <p>1. Click Connect with Google and complete authentication.<br>
+    2. Copy the access token from the success page.<br>
+    3. Paste it below and click Save Token to see your calendar events.</p>
+    <button id="connect-google">Connect with Google</button>
+    <div id="token-section">
+      <input type="text" id="access-token" placeholder="Paste access token here" />
+      <button id="save-token">Save Token</button>
+    </div>
+    <ul id="events"></ul>
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html> 

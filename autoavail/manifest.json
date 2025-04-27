@@ -1,0 +1,16 @@
+{
+  "name": "AutoAvail",
+  "description": "Show your Google Calendar availability in the extension.",
+  "version": "1.0",
+  "permissions": [
+    "storage"
+  ],
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "hello.html",
+    "default_icon": "autoavail.png"
+  }, 
+  "host_permissions": [
+    "http://localhost:3000/*"
+  ]
+} 
