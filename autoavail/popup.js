@@ -1,10 +1,10 @@
 const { BACKEND_API_URL } = window.AUTOAVAIL_CONFIG;
 
-function getFreeSlots(events, dayStart, dayEnd) {
+function getFreeSlots(events, dayStart, dayEnd, prefs) {
   // events: array of {start: {dateTime}, end: {dateTime}}
   // dayStart, dayEnd: Date objects for the workday
   const slots = [];
-  const slotDuration = 30 * 60 * 1000; // 30 minutes in ms
+  const slotDuration = prefs.slot_minutes * 60 * 1000;
   let current = new Date(dayStart);
   const end = new Date(dayEnd);
 
@@ -13,11 +13,37 @@ function getFreeSlots(events, dayStart, dayEnd) {
     new Date(a.start.dateTime) - new Date(b.start.dateTime)
   );
 
+  // Parse do-not-book window
+  const [uaH1, uaM1] = prefs.unavail_start.split(":").map(Number);
+  const [uaH2, uaM2] = prefs.unavail_end.split(":").map(Number);
+
   for (let i = 0; current < end; i++) {
     const slotStart = new Date(current);
     const slotEnd = new Date(current.getTime() + slotDuration);
     if (slotEnd > end) break;
 
+    // Calculate do-not-book window for this day
+    const unavailStart = new Date(slotStart); unavailStart.setHours(uaH1, uaM1, 0, 0);
+    const unavailEnd   = new Date(slotStart); unavailEnd.setHours(uaH2, uaM2, 0, 0);
+
+    // If do-not-book window crosses midnight, handle that
+    let overlapsDoNotBook = false;
+    if (unavailEnd > unavailStart) {
+      // Normal case: same day
+      overlapsDoNotBook = slotEnd > unavailStart && slotStart < unavailEnd;
+    } else {
+      // Crosses midnight: e.g., 22:00-06:00
+      // Slot overlaps if it overlaps either [unavailStart, 23:59:59] or [00:00, unavailEnd]
+      const dayEnd = new Date(slotStart); dayEnd.setHours(23,59,59,999);
+      const nextDay = new Date(slotStart); nextDay.setDate(nextDay.getDate() + 1); nextDay.setHours(0,0,0,0);
+      overlapsDoNotBook =
+        (slotEnd > unavailStart && slotStart < dayEnd) ||
+        (slotEnd > nextDay && slotStart < unavailEnd);
+    }
+    if (overlapsDoNotBook) {
+      current = slotEnd;
+      continue;
+    }
     // Check if this slot overlaps with any event
     const overlaps = sortedEvents.some(event => {
       const eventStart = new Date(event.start.dateTime);
@@ -34,7 +60,7 @@ function getFreeSlots(events, dayStart, dayEnd) {
   return slots;
 }
 
-function fetchAndDisplayAvailability(token) {
+function fetchAndDisplayAvailability(token, prefs) {
   const eventsList = document.getElementById('events');
   eventsList.innerHTML = '<li>Loading availability...</li>';
   const now = new Date();
@@ -64,10 +90,15 @@ function fetchAndDisplayAvailability(token) {
       // For each day from today to +7 days, show free slots
       for (let d = new Date(now); d <= endDate; d.setDate(d.getDate() + 1)) {
         const dayStr = d.toDateString();
-        const workStart = new Date(d); workStart.setHours(9,0,0,0);
-        const workEnd = new Date(d); workEnd.setHours(17,0,0,0);
+        const workStart = new Date(d);
+        const [wsH, wsM] = prefs.work_start.split(":");
+        workStart.setHours(wsH, wsM, 0, 0);
+
+        const workEnd = new Date(d);
+        const [weH, weM] = prefs.work_end.split(":");
+        workEnd.setHours(weH, weM, 0, 0);
         const dayEvents = days[dayStr] || [];
-        const freeSlots = getFreeSlots(dayEvents, workStart, workEnd);
+        const freeSlots = getFreeSlots(dayEvents, workStart, workEnd, prefs);
         const li = document.createElement('li');
         li.innerHTML = `<b>${dayStr}</b><br>` + (freeSlots.length ? freeSlots.join('<br>') : '<i>No availability</i>');
         eventsList.appendChild(li);
@@ -95,17 +126,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const token = accessTokenInput.value.trim();
     if (token) {
       chrome.storage.local.set({ gcal_token: token }, function() {
-        fetchAndDisplayAvailability(token);
+        // Always reload preferences before displaying availability
+        chrome.storage.local.get(
+          ["unavail_start", "unavail_end", "work_start", "work_end", "slot_minutes"],
+          function (prefs) {
+            fetchAndDisplayAvailability(token, {
+              unavail_start : prefs.unavail_start || "02:00",
+              unavail_end   : prefs.unavail_end   || "07:00",
+              work_start    : prefs.work_start    || "09:00",
+              work_end      : prefs.work_end      || "17:00",
+              slot_minutes  : prefs.slot_minutes  || 30
+            });
+          }
+        );
       });
     }
   });
 
   // On load, try to get token from storage and fetch events
-  chrome.storage.local.get('gcal_token', function(result) {
-    const token = result.gcal_token;
-    if (token) {
-      accessTokenInput.value = token;
-      fetchAndDisplayAvailability(token);
+  chrome.storage.local.get(
+    ["gcal_token", "unavail_start", "unavail_end",
+     "work_start",  "work_end", "slot_minutes"],
+    function (result) {
+      const token = result.gcal_token;
+      const prefs = {
+        unavail_start : result.unavail_start || "02:00",
+        unavail_end   : result.unavail_end   || "07:00",
+        work_start    : result.work_start    || "09:00",
+        work_end      : result.work_end      || "17:00",
+        slot_minutes  : result.slot_minutes  || 30
+      };
+      if (token) {
+        accessTokenInput.value = token;
+        fetchAndDisplayAvailability(token, prefs);
+      }
     }
-  });
+  );
 }); 
