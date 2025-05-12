@@ -425,6 +425,20 @@ function restoreSelection(range) {
 async function generateAvailabilityText(token) {
     debugLog(`Fetching calendar data from ${BACKEND_API_URL}/api/calendar/events`);
 
+    // Load preferences
+    const prefs = await new Promise(resolve => {
+        chrome.storage.local.get(
+            {
+                work_start: "09:00",
+                work_end: "17:00",
+                slot_minutes: 30,
+                unavail_start: "02:00",
+                unavail_end: "07:00"
+            },
+            resolve
+        );
+    });
+
     const response = await fetch(`${BACKEND_API_URL}/api/calendar/events`, {
         headers: {
             'Authorization': `Bearer ${token}`
@@ -440,12 +454,12 @@ async function generateAvailabilityText(token) {
     const data = await response.json();
     debugLog('Successfully fetched calendar data');
 
-    
-    return formatAvailabilityForEmail(data);
+    // Pass prefs to formatter
+    return formatAvailabilityForEmail(data, prefs);
 }
 
 
-function formatAvailabilityForEmail(calendarData) {
+function formatAvailabilityForEmail(calendarData, prefs) {
     if (!calendarData.items) {
         debugLog('No calendar items found');
         return "I don't have any events scheduled for the next week, so I'm generally available.";
@@ -453,7 +467,6 @@ function formatAvailabilityForEmail(calendarData) {
 
     debugLog(`Formatting ${calendarData.items.length} calendar events`);
 
-    
     const days = {};
     const now = new Date();
     const endDate = new Date(now);
@@ -466,7 +479,6 @@ function formatAvailabilityForEmail(calendarData) {
         days[day].push(event);
     });
 
-    
     let availabilityText = "Here's my availability for the next week:\n\n";
 
     for (let d = new Date(now); d <= endDate; d.setDate(d.getDate() + 1)) {
@@ -474,16 +486,18 @@ function formatAvailabilityForEmail(calendarData) {
         const dayName = dayStr.split(' ')[0];
         const dayDate = `${d.getMonth() + 1}/${d.getDate()}`;
 
-        const workStart = new Date(d); workStart.setHours(9, 0, 0, 0);
-        const workEnd = new Date(d); workEnd.setHours(17, 0, 0, 0);
+        // Use prefs for work hours
+        const [wsH, wsM] = (prefs.work_start || "09:00").split(":");
+        const [weH, weM] = (prefs.work_end || "17:00").split(":");
+        const workStart = new Date(d); workStart.setHours(wsH, wsM, 0, 0);
+        const workEnd = new Date(d); workEnd.setHours(weH, weM, 0, 0);
 
         const dayEvents = days[dayStr] || [];
-        const freeSlots = getFreeSlots(dayEvents, workStart, workEnd);
+        const freeSlots = getFreeSlots(dayEvents, workStart, workEnd, prefs);
 
         availabilityText += `${dayName} ${dayDate}: `;
 
         if (freeSlots.length) {
-            
             const groupedSlots = groupConsecutiveSlots(freeSlots);
             availabilityText += groupedSlots.join(', ');
         } else {
@@ -528,24 +542,49 @@ function groupConsecutiveSlots(slots) {
 }
 
 
-function getFreeSlots(events, dayStart, dayEnd) {
-    
+function getFreeSlots(events, dayStart, dayEnd, prefs) {
     const slots = [];
-    const slotDuration = 30 * 60 * 1000; 
+    const slotDuration = (prefs && prefs.slot_minutes ? prefs.slot_minutes : 30) * 60 * 1000;
     let current = new Date(dayStart);
     const end = new Date(dayEnd);
 
-    
+    // Sort events by start time
     const sortedEvents = events.slice().sort((a, b) =>
         new Date(a.start.dateTime) - new Date(b.start.dateTime)
     );
+
+    // Parse do-not-book window
+    const [uaH1, uaM1] = (prefs && prefs.unavail_start ? prefs.unavail_start : "02:00").split(":").map(Number);
+    const [uaH2, uaM2] = (prefs && prefs.unavail_end ? prefs.unavail_end : "07:00").split(":").map(Number);
 
     for (let i = 0; current < end; i++) {
         const slotStart = new Date(current);
         const slotEnd = new Date(current.getTime() + slotDuration);
         if (slotEnd > end) break;
 
-        
+        // Calculate do-not-book window for this day
+        const unavailStart = new Date(slotStart); unavailStart.setHours(uaH1, uaM1, 0, 0);
+        const unavailEnd   = new Date(slotStart); unavailEnd.setHours(uaH2, uaM2, 0, 0);
+
+        // If do-not-book window crosses midnight, handle that
+        let overlapsDoNotBook = false;
+        if (unavailEnd > unavailStart) {
+            // Normal case: same day
+            overlapsDoNotBook = slotEnd > unavailStart && slotStart < unavailEnd;
+        } else {
+            // Crosses midnight: e.g., 22:00-06:00
+            // Slot overlaps if it overlaps either [unavailStart, 23:59:59] or [00:00, unavailEnd]
+            const dayEnd = new Date(slotStart); dayEnd.setHours(23,59,59,999);
+            const nextDay = new Date(slotStart); nextDay.setDate(nextDay.getDate() + 1); nextDay.setHours(0,0,0,0);
+            overlapsDoNotBook =
+                (slotEnd > unavailStart && slotStart < dayEnd) ||
+                (slotEnd > nextDay && slotStart < unavailEnd);
+        }
+        if (overlapsDoNotBook) {
+            current = slotEnd;
+            continue;
+        }
+        // Check if this slot overlaps with any event
         const overlaps = sortedEvents.some(event => {
             const eventStart = new Date(event.start.dateTime);
             const eventEnd = new Date(event.end.dateTime);
