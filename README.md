@@ -9,7 +9,7 @@ AutoAvail is a Chrome extension that displays your Google Calendar availability 
 
 ### 1. Get a Google API Client ID
 - Follow the official guide: [Get your Google API client ID](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
-- ENABLE Google Calendar API in your cloud console
+- ENABLE Google Calendar API in your cloud console -> Credentials -> Create Credentials (follow steps below)
 - **Steps:**
   1. Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
   2. Create/select a project
