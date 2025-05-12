@@ -13,16 +13,34 @@ function getFreeSlots(events, dayStart, dayEnd, prefs) {
     new Date(a.start.dateTime) - new Date(b.start.dateTime)
   );
 
+  // Parse do-not-book window
+  const [uaH1, uaM1] = prefs.unavail_start.split(":").map(Number);
+  const [uaH2, uaM2] = prefs.unavail_end.split(":").map(Number);
+
   for (let i = 0; current < end; i++) {
     const slotStart = new Date(current);
     const slotEnd = new Date(current.getTime() + slotDuration);
     if (slotEnd > end) break;
-    const [uaH1, uaM1] = prefs.unavail_start.split(":").map(Number);
-    const [uaH2, uaM2] = prefs.unavail_end.split(":").map(Number);
+
+    // Calculate do-not-book window for this day
     const unavailStart = new Date(slotStart); unavailStart.setHours(uaH1, uaM1, 0, 0);
     const unavailEnd   = new Date(slotStart); unavailEnd.setHours(uaH2, uaM2, 0, 0);
 
-    if (slotEnd > unavailStart && slotStart < unavailEnd) {
+    // If do-not-book window crosses midnight, handle that
+    let overlapsDoNotBook = false;
+    if (unavailEnd > unavailStart) {
+      // Normal case: same day
+      overlapsDoNotBook = slotEnd > unavailStart && slotStart < unavailEnd;
+    } else {
+      // Crosses midnight: e.g., 22:00-06:00
+      // Slot overlaps if it overlaps either [unavailStart, 23:59:59] or [00:00, unavailEnd]
+      const dayEnd = new Date(slotStart); dayEnd.setHours(23,59,59,999);
+      const nextDay = new Date(slotStart); nextDay.setDate(nextDay.getDate() + 1); nextDay.setHours(0,0,0,0);
+      overlapsDoNotBook =
+        (slotEnd > unavailStart && slotStart < dayEnd) ||
+        (slotEnd > nextDay && slotStart < unavailEnd);
+    }
+    if (overlapsDoNotBook) {
       current = slotEnd;
       continue;
     }
@@ -108,7 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const token = accessTokenInput.value.trim();
     if (token) {
       chrome.storage.local.set({ gcal_token: token }, function() {
-        fetchAndDisplayAvailability(token);
+        // Always reload preferences before displaying availability
+        chrome.storage.local.get(
+          ["unavail_start", "unavail_end", "work_start", "work_end", "slot_minutes"],
+          function (prefs) {
+            fetchAndDisplayAvailability(token, {
+              unavail_start : prefs.unavail_start || "02:00",
+              unavail_end   : prefs.unavail_end   || "07:00",
+              work_start    : prefs.work_start    || "09:00",
+              work_end      : prefs.work_end      || "17:00",
+              slot_minutes  : prefs.slot_minutes  || 30
+            });
+          }
+        );
       });
     }
   });
