@@ -1,24 +1,164 @@
 <html>
-  <head>
-    <style>
-      body { min-width: 400px; font-family: Arial, sans-serif; }
-      #token-section { margin-top: 1em; }
-      #events { margin-top: 1em; }
-      input[type="text"] { width: 90%; }
-    </style>
-  </head>
-  <body>
-    <h1>AutoAvail</h1>
-    <p>1. Click Connect with Google and complete authentication.<br>
+
+<head>
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' http://localhost:* http://127.0.0.1:*">
+  <style>
+    body {
+      min-width: 400px;
+      font-family: Arial, sans-serif;
+      padding: 10px;
+    }
+
+    #token-section {
+      margin-top: 1em;
+    }
+
+    #events {
+      margin-top: 1em;
+    }
+
+    input[type="text"] {
+      width: 90%;
+    }
+
+    .feature-section {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+
+    h2 {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    kbd {
+      background-color: #eee;
+      border-radius: 3px;
+      border: 1px solid #b4b4b4;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+      color: #333;
+      display: inline-block;
+      font-size: 0.85em;
+      font-weight: 700;
+      line-height: 1;
+      padding: 2px 4px;
+      white-space: nowrap;
+    }
+
+    .shortcut {
+      margin-top: 5px;
+      font-size: 0.9em;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .ai-status {
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .note {
+      font-size: 0.85em;
+      font-style: italic;
+      margin-top: 5px;
+      color: #666;
+    }
+
+    .important {
+      font-weight: bold;
+      color: #d14836;
+    }
+
+    .steps {
+      margin-left: 15px;
+      padding-left: 0;
+    }
+
+    .steps li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>AutoAvail</h1>
+  <p>1. Click Connect with Google and complete authentication.<br>
     2. Copy the access token from the success page.<br>
     3. Paste it below and click Save Token to see your calendar events.</p>
-    <button id="connect-google">Connect with Google</button>
-    <div id="token-section">
-      <input type="text" id="access-token" placeholder="Paste access token here" />
-      <button id="save-token">Save Token</button>
+  <button id="connect-google">Connect with Google</button>
+  <div id="token-section">
+    <input type="text" id="access-token" placeholder="Paste access token here" />
+    <button id="save-token">Save Token</button>
+  </div>
+  <ul id="events"></ul>
+
+  <div class="feature-section">
+    <h2>Gmail Integration</h2>
+    <p>Type <strong>{availability}</strong> in any Gmail compose window and it will be replaced with your free times for
+      the next week.</p>
+  </div>
+
+  <div class="feature-section">
+    <h2>AI Email Generation</h2>
+    <p>When you use the <strong>{availability}</strong> tag, AutoAvail can use OpenAI to generate a
+      professional email response with your availability.</p>
+    <div id="openai-section">
+      <p>Enter your OpenAI API key to enable AI email generation:</p>
+      <input type="password" id="openai-key" placeholder="sk-..." />
+      <button id="save-openai-key">Save Key</button>
+      <div id="openai-status" class="ai-status"></div>
+
+      <div class="info-text" style="margin-top: 10px;">
+        <p><span class="important">How to get an OpenAI API key:</span></p>
+        <ol class="steps">
+          <li>Visit <a href="https://platform.openai.com/" target="_blank">OpenAI Platform</a></li>
+          <li>Create an account or sign in</li>
+          <li>Go to API Keys section</li>
+          <li>Create a new API key</li>
+          <li>Copy and paste it above</li>
+        </ol>
+        <p class="note">Your API key should start with "sk-..."</p>
+      </div>
+      <p class="note">After saving your API key, reload Gmail tabs for changes to take effect.</p>
     </div>
-    <ul id="events"></ul>
-    <script src="config.js"></script>
-    <script src="popup.js"></script>
-  </body>
-</html> 
+  </div>
+
+  <div class="feature-section">
+    <h2>Troubleshooting</h2>
+    <p>If the Gmail integration isn't working:</p>
+    <ul>
+      <li>Make sure you've authenticated with Google Calendar</li>
+      <li>Try refreshing your Gmail tab</li>
+      <li>Open the browser console (F12) to see debug messages</li>
+      <li>Try typing <strong>{availability}</strong> followed by a space</li>
+      <li>Check that your OpenAI API key is entered correctly</li>
+    </ul>
+    <p class="note">For technical issues, check the browser console (F12 > Console tab) for detailed logs.</p>
+
+    <div style="margin-top: 10px;">
+      <p><span class="important">If you see OpenAI API errors:</span></p>
+      <ul>
+        <li>Ensure you're using a valid API key from OpenAI Platform</li>
+        <li>Make sure your API key is active and has not expired</li>
+        <li>The extension will still work with formatted availability data even if AI generation fails</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+
+</html>
