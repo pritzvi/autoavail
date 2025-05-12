@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AutoAvail – Preferences</title>
+  <style>
+    body { font: 15px/1.4 system-ui, sans-serif; margin: 2rem; }
+    fieldset { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.5rem; }
+    legend { font-weight: 600; }
+    label { display: block; margin-bottom: .5rem; }
+    input[type="time"] { margin-right: .5rem; }
+    .btn { margin-top: 1rem; padding: .4rem .9rem; }
+  </style>
+</head>
+<body>
+  <h1>AutoAvail Preferences</h1>
+
+  <fieldset>
+    <legend>Daily “Do Not Book” window</legend>
+    <label>
+      Start time:
+      <input id="unavail-start" type="time" step="60" />
+    </label>
+    <label>
+      End time:
+      <input id="unavail-end" type="time" step="60" />
+    </label>
+    <small>(defaults to 02:00 – 07:00)</small>
+  </fieldset>
+
+  <fieldset>
+    <legend>Extras</legend>
+
+    <label>
+      Work-day start:
+      <input id="work-start" type="time" step="60" value="09:00" />
+    </label>
+    <label>
+      Work-day end:
+      <input id="work-end" type="time" step="60" value="17:00" />
+    </label>
+
+    <label>
+      Slot length (minutes):
+      <input id="slot-min" type="number" min="5" step="5" value="30" />
+    </label>
+  </fieldset>
+
+  <button id="save"  class="btn">Save</button>
+  <button id="reset" class="btn">Reset to defaults</button>
+
+  <script src="options.js"></script>
+</body>
+</html>
