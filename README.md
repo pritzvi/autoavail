@@ -22,7 +22,7 @@ AutoAvail is a Chrome extension that displays your Google Calendar availability 
   7. Save your **Client ID** and **Client Secret**
 
 ### 2a. Configure the Backend
-- In `chrome_ext/backend/.env.local` (or `.env`), set:
+- In `chrome_ext/backend/.env` (or `.env`), set:
   ```
   GOOGLE_CLIENT_ID=your-client-id
   GOOGLE_CLIENT_SECRET=your-client-secret
@@ -31,7 +31,7 @@ AutoAvail is a Chrome extension that displays your Google Calendar availability 
 ### 2b. Configure the Backend
 
 ### 3. Install Backend Dependencies
-- In `chrome_ext/autoavail/config.js`, set your own GOOGLE_CLIENT_ID (same as the one for backend)
+- IMPORTANT: In `chrome_ext/autoavail/config.js`, set your own GOOGLE_CLIENT_ID (same as the one for backend). The existing credentials are wrong, REPLACE them with the same one as the one in backend/.env
 ```sh
 cd chrome_ext/backend
 npm install
