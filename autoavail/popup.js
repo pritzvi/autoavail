@@ -1,4 +1,5 @@
-const { BACKEND_API_URL } = window.AUTOAVAIL_CONFIG;
+// Import config
+const BACKEND_API_URL = window.config.BACKEND_API_URL;
 
 function getFreeSlots(events, dayStart, dayEnd, prefs) {
   // events: array of {start: {dateTime}, end: {dateTime}}
@@ -53,7 +54,7 @@ function getFreeSlots(events, dayStart, dayEnd, prefs) {
       );
     });
     if (!overlaps) {
-      slots.push(`${slotStart.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${slotEnd.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`);
+      slots.push(`${slotStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${slotEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
     }
     current = slotEnd;
   }
@@ -109,12 +110,12 @@ function fetchAndDisplayAvailability(token, prefs) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const connectBtn = document.getElementById('connect-google');
   const saveTokenBtn = document.getElementById('save-token');
   const accessTokenInput = document.getElementById('access-token');
 
-  connectBtn.addEventListener('click', function() {
+  connectBtn.addEventListener('click', function () {
     fetch(`${BACKEND_API_URL}/api/auth/url`)
       .then(res => res.json())
       .then(data => {
@@ -122,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 
-  saveTokenBtn.addEventListener('click', function() {
+  saveTokenBtn.addEventListener('click', function () {
     const token = accessTokenInput.value.trim();
     if (token) {
       chrome.storage.local.set({ gcal_token: token }, function() {
@@ -162,4 +163,55 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   );
+
+  // Additional setup for OpenAI integration
+  const saveOpenAIKeyBtn = document.getElementById('save-openai-key');
+  const openaiKeyInput = document.getElementById('openai-key');
+  const openaiStatus = document.getElementById('openai-status');
+
+  // Load saved OpenAI API key
+  chrome.storage.local.get('openai_api_key', function (result) {
+    if (result.openai_api_key) {
+      openaiKeyInput.value = result.openai_api_key;
+      openaiStatus.textContent = "AI email generation is enabled";
+      openaiStatus.className = "ai-status success";
+    }
+  });
+
+  // Save OpenAI API key
+  if (saveOpenAIKeyBtn) {
+    saveOpenAIKeyBtn.addEventListener('click', function () {
+      const apiKey = openaiKeyInput.value.trim();
+
+      if (apiKey) {
+        chrome.storage.local.set({ openai_api_key: apiKey }, function () {
+          // Notify background script
+          chrome.runtime.sendMessage({
+            action: 'updateOpenAIKey',
+            apiKey: apiKey
+          }, function (response) {
+            if (response && response.success) {
+              openaiStatus.textContent = "AI email generation is enabled";
+              openaiStatus.className = "ai-status success";
+            } else {
+              openaiStatus.textContent = "Failed to update API key";
+              openaiStatus.className = "ai-status error";
+            }
+          });
+        });
+      } else {
+        // Clear the API key
+        chrome.storage.local.remove('openai_api_key', function () {
+          // Notify background script
+          chrome.runtime.sendMessage({
+            action: 'updateOpenAIKey',
+            apiKey: ""
+          }, function (response) {
+            openaiStatus.textContent = "AI email generation is disabled";
+            openaiStatus.className = "ai-status error";
+          });
+        });
+      }
+    });
+  }
 }); 

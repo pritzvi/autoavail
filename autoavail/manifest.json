@@ -1,17 +1,49 @@
 {
-  "name": "AutoAvail",
-  "description": "Show your Google Calendar availability in the extension.",
-  "version": "1.0",
-  "permissions": [
-    "storage"
-  ],
   "manifest_version": 3,
+  "name": "AutoAvail",
+  "version": "1.0",
+  "description": "Automatically generate availability emails in Gmail",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "http://localhost:3000/*" 
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "gmail-content.js"
+      ]
+    }
+  ],
   "action": {
     "default_popup": "hello.html",
     "default_icon": "autoavail.png"
-  }, 
+  },
   "options_page": "options.html",
-  "host_permissions": [
-    "http://localhost:3000/*"
-  ]
-} 
+  "icons": {
+    "128": "autoavail.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "config.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
