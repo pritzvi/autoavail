@@ -1,7 +1,7 @@
-# AutoAvail Chrome Extension + Backend
+# AutoAvail
 
 ## Overview
-AutoAvail is a Chrome extension that displays your Google Calendar availability for the next 7 days, using a local backend for OAuth and Google Calendar API proxying.
+AutoAvail is a Chrome extension designed to help busy students and professionals easily share their Google Calendar availability for the next 7 days, streamlining the process of networking, scheduling interviews, and coordinating meetings. By leveraging a local backend for secure OAuth authentication and Google Calendar API proxying, AutoAvail enables users to quickly view and share their free time slots directly from their browser. The extension allows for customizable constraints—such as specifying working hours (e.g., 9am–5pm) or blocking out recurring busy periods (like lunch breaks)—making it a practical tool for anyone who needs a fast, flexible way to communicate their availability without the hassle of manual calendar checks.
 
 ---
 
