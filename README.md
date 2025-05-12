@@ -1,7 +1,7 @@
 # AutoAvail
 
 ## Overview
-AutoAvail is a Chrome extension designed to help busy students and professionals easily share their Google Calendar availability for the next 7 days, streamlining the process of networking, scheduling interviews, and coordinating meetings. Users can provide a detailed email with their availability drafted by an LLM (OpenAI) by simply typing the keyword {availability} into their email. By leveraging a local backend for secure OAuth authentication and Google Calendar API proxying, AutoAvail enables users to quickly view and share their free time slots directly from their browser. The extension allows for customizable constraints—such as specifying working hours (e.g., 9am–5pm) or blocking out recurring busy periods (like lunch breaks)—making it a practical tool for anyone who needs a fast, flexible way to communicate their availability without the hassle of manual calendar checks.
+AutoAvail is a Chrome extension designed to help busy students and professionals easily share their Google Calendar availability for the next 7 days, streamlining the process of networking, scheduling interviews, and coordinating meetings. Users can draft a detailed email with their availability drafted by an LLM (OpenAI) by simply typing the keyword {availability} into their email. By leveraging a local backend for secure OAuth authentication and Google Calendar API proxying, AutoAvail enables users to quickly view and share their free time slots directly from their browser. The extension allows for customizable constraints—such as specifying working hours (e.g., 9am–5pm) or blocking out recurring busy periods (like lunch breaks)—making it a practical tool for anyone who needs a fast, flexible way to communicate their availability without the hassle of manual calendar checks.
 
 ---
 
@@ -83,11 +83,11 @@ node server.js
 
 ---
 
-## TODO / Future Features
-- **Trigger detection ("{availability}") with Gmail API. Use LLM to parse availability into readable format for email.**
-- **Preferences/settings page**
-- **Settings UI for customizing work hours & calendar preferences**
-- **Landing page**
+## Features
+- **Clyve Gassant: Trigger detection ("{availability}") with Gmail API. Use LLM to parse availability into readable format for email.**
+- **Hemosoo Woo: Settings UI for customizing work hours & calendar preferences**
+- **Natalie Lim: Landing page**
+- **Prithvi Bale: Google Calendar API integration to fetch latest availability over next week**
 
 ---
 
@@ -95,6 +95,7 @@ node server.js
 - Make sure you are using a Google account that is whitelisted as a test user in your OAuth consent screen
 - Make sure your client ID, secret, and redirect URI match exactly in Google Cloud Console and your `.env` file
 - If you see CORS or cookie issues, ensure you are using the access token in the Authorization header as described
+- Make sure your OpenAI API account has enough credits
 
 ---
 
