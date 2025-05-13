@@ -87,8 +87,8 @@ node server.js
 
 ## Features
 - **Clyve Gassant: Trigger detection ("{availability}") with Gmail API. Use LLM to parse availability into readable format for email.**
-- **Hemosoo Woo: Settings UI for customizing work hours & calendar preferences**
-- **Natalie Lim: Landing page**
+- **Hemosoo Woo: Settings page for customizing work hours & calendar preferences**
+- **Natalie Lim: Extension landing page. UI/UX for extension popup and calendar preference settings page**
 - **Prithvi Bale: Google Calendar API integration to fetch latest availability over next week**
 
 ---
