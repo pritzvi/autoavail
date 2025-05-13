@@ -58,7 +58,7 @@ node server.js
 4. Paste it into the extension and click **Save Token**
 5. Your availability for the next 7 days will be displayed
 
-### 7. Get an OpenAI API key and make sure you have enough credits $$ in your OpenAI account - this will be used to generate an email draft using your {availability}
+### 7. Get an OpenAI API key and make sure you have enough credits $$ in your OpenAI account - this will be used to generate an email draft using your {availability}. RELOAD your gmail page after saving OpenAI key. 
 
 ---
 
