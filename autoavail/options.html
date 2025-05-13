@@ -3,53 +3,193 @@
 <head>
   <meta charset="UTF-8" />
   <title>AutoAvail – Preferences</title>
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
-    body { font: 15px/1.4 system-ui, sans-serif; margin: 2rem; }
-    fieldset { border: 1px solid #ccc; border-radius: 6px; padding: 1rem 1.5rem; }
-    legend { font-weight: 600; }
-    label { display: block; margin-bottom: .5rem; }
-    input[type="time"] { margin-right: .5rem; }
-    .btn { margin-top: 1rem; padding: .4rem .9rem; }
+    :root {
+      --primary: #2563eb;
+      --accent: #6366f1;
+      --bg: #f5faff;
+      --bg-card: #fff;
+      --text: #222;
+      --border: #e5e7eb;
+      --shadow: 0 2px 12px rgba(99,102,241,0.07);
+      --header-bg: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
+    }
+    html, body {
+      min-width: 400px;
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      color: var(--text);
+    }
+    .header {
+      background: var(--header-bg);
+      color: #fff;
+      font-size: 1.5em;
+      font-weight: 700;
+      padding: 18px 32px 14px 32px;
+      letter-spacing: 1px;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+      margin: 28px 28px 28px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .container {
+      padding: 0 28px 28px 28px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      padding: 28px 28px 18px 28px;
+      border: 1.5px solid var(--border);
+      position: relative;
+    }
+    .card:last-child {
+      margin-bottom: 0;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.18em;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 18px;
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
+    .card-title i {
+      font-size: 1.1em;
+      color: var(--accent);
+      opacity: 0.8;
+    }
+    .card legend {
+      display: none;
+    }
+    .card label {
+      display: block;
+      margin-bottom: 0.7rem;
+      font-size: 1em;
+    }
+    .card input[type="time"] {
+      min-width: 120px;
+      width: 140px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 12px;
+      font-size: 1em;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      background: #f8fafc;
+      color: var(--text);
+      transition: border 0.2s;
+    }
+    .card input[type="time"]:focus {
+      border: 1.5px solid var(--accent);
+      outline: none;
+      background: #fff;
+    }
+    .card input[type="number"] {
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 12px;
+      font-size: 1em;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      background: #f8fafc;
+      color: var(--text);
+      transition: border 0.2s;
+    }
+    .card input[type="number"]:focus {
+      border: 1.5px solid var(--accent);
+      outline: none;
+      background: #fff;
+    }
+    .card small {
+      color: #64748b;
+      font-size: 0.97em;
+      margin-top: 2px;
+      display: block;
+    }
+    .btn {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: 1em;
+      font-weight: 600;
+      margin-top: 12px;
+      margin-right: 10px;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(99,102,241,0.08);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover, .btn:focus {
+      background: linear-gradient(90deg, #1d4ed8 0%, var(--accent) 100%);
+      box-shadow: 0 2px 8px rgba(99,102,241,0.13);
+      outline: none;
+    }
+    #save-msg {
+      color: #22c55e;
+      margin-top: 1.2em;
+      font-size: 1.05em;
+      font-weight: 500;
+    }
+    @media (max-width: 600px) {
+      .header, .container { margin: 10px; padding: 10px; }
+      .card { padding: 12px; }
+    }
   </style>
 </head>
 <body>
-  <h1>AutoAvail Preferences</h1>
+  <div class="header">
+    <i class="fa-solid fa-sliders"></i>&nbsp; AutoAvail Preferences
+  </div>
+  <div class="container">
+    <form>
+      <fieldset class="card">
+        <div class="card-title"><i class="fa-regular fa-clock"></i> Daily "Do Not Book" window</div>
+        <label>
+          Start time:<br>
+          <input id="unavail-start" type="time" step="60" />
+        </label>
+        <label>
+          End time:<br>
+          <input id="unavail-end" type="time" step="60" />
+        </label>
+        <small>(defaults to 02:00 – 07:00)</small>
+      </fieldset>
 
-  <fieldset>
-    <legend>Daily "Do Not Book" window</legend>
-    <label>
-      Start time:
-      <input id="unavail-start" type="time" step="60" />
-    </label>
-    <label>
-      End time:
-      <input id="unavail-end" type="time" step="60" />
-    </label>
-    <small>(defaults to 02:00 – 07:00)</small>
-  </fieldset>
+      <fieldset class="card">
+        <div class="card-title"><i class="fa-solid fa-briefcase"></i> Extras</div>
+        <label>
+          Work-day start:<br>
+          <input id="work-start" type="time" step="60" value="09:00" />
+        </label>
+        <label>
+          Work-day end:<br>
+          <input id="work-end" type="time" step="60" value="17:00" />
+        </label>
+        <label>
+          Slot length (minutes):<br>
+          <input id="slot-min" type="number" min="5" step="5" value="30" />
+        </label>
+      </fieldset>
 
-  <fieldset>
-    <legend>Extras</legend>
-
-    <label>
-      Work-day start:
-      <input id="work-start" type="time" step="60" value="09:00" />
-    </label>
-    <label>
-      Work-day end:
-      <input id="work-end" type="time" step="60" value="17:00" />
-    </label>
-
-    <label>
-      Slot length (minutes):
-      <input id="slot-min" type="number" min="5" step="5" value="30" />
-    </label>
-  </fieldset>
-
-  <button id="save"  class="btn">Save</button>
-  <button id="reset" class="btn">Reset to defaults</button>
-  <div id="save-msg" style="display:none; color:green; margin-top:1em;"></div>
-
+      <button id="save"  class="btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+      <button id="reset" class="btn" type="button"><i class="fa-solid fa-rotate-left"></i> Reset to defaults</button>
+      <div id="save-msg" style="display:none;"></div>
+    </form>
+  </div>
   <script src="options.js"></script>
 </body>
 </html>
