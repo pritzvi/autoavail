@@ -164,6 +164,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   );
 
+  // Settings button handler
+  const openSettingsBtn = document.getElementById('open-settings');
+  if (openSettingsBtn) {
+    openSettingsBtn.addEventListener('click', function() {
+      if (chrome.runtime.openOptionsPage) {
+        chrome.runtime.openOptionsPage();
+      } else {
+        window.open('options.html');
+      }
+    });
+  }
+
   // Additional setup for OpenAI integration
   const saveOpenAIKeyBtn = document.getElementById('save-openai-key');
   const openaiKeyInput = document.getElementById('openai-key');
